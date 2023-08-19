@@ -10,6 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+#include "AbilitySystemComponent.h"
+#include "CombatAttributeSet.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 // ANinjaCombatCharacter
@@ -49,6 +52,46 @@ ANinjaCombatCharacter::ANinjaCombatCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
+	
+	Attributes = CreateDefaultSubobject<UCombatAttributeSet>("Attributes");
+}
+
+UAbilitySystemComponent* ANinjaCombatCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
+}
+
+void ANinjaCombatCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (AbilitySystemComponent)
+		AbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	InitializeAttributes();
+	GiveDefaultAbilities();
+}
+
+void ANinjaCombatCharacter::InitializeAttributes()
+{
+	if (AbilitySystemComponent && DefaultAttibuteEffect)
+	{
+		FGameplayEffectContextHandle EffectContext = AbilitySystemComponent->MakeEffectContext();
+		EffectContext.AddSourceObject(this);
+		FGameplayEffectSpecHandle SpecHandle = AbilitySystemComponent->MakeOutgoingSpec(DefaultAttibuteEffect, 1, EffectContext);
+
+		if (SpecHandle.IsValid())
+			FActiveGameplayEffectHandle GEHandle = AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SpecHandle.Data.Get());
+	}
+}
+
+void ANinjaCombatCharacter::GiveDefaultAbilities()
+{
+	if (AbilitySystemComponent)
+		for (TSubclassOf<UGameplayAbility>& StartupAbility : DefaultAbilities)
+			AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(StartupAbility.GetDefaultObject(), 1, 0));
 }
 
 void ANinjaCombatCharacter::BeginPlay()
@@ -65,6 +108,7 @@ void ANinjaCombatCharacter::BeginPlay()
 		}
 	}
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 // Input
