@@ -6,11 +6,7 @@
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 
-#include "GameplayTagContainer.h"
-#include <GameplayEffectTypes.h>
 #include "AbilitySystemInterface.h"
-
-#include "CombatAttributeSet.h"
 
 #include "NinjaCombatCharacter.generated.h"
 
@@ -47,8 +43,8 @@ class ANinjaCombatCharacter : public ACharacter, public IAbilitySystemInterface
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Abilities, meta = (AllowPrivateAccess = "true"))
 	class UAbilitySystemComponent* AbilitySystemComponent;
 
-	UPROPERTY()
-	class UCombatAttributeSet* Attributes;
+	//UPROPERTY()
+	//class UCombatAttributeSet* Attributes;
 
 public:
 	ANinjaCombatCharacter();
@@ -77,15 +73,5 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-
-	virtual void PossessedBy(AController* NewController) override;
-	virtual void InitializeAttributes();
-	virtual void GiveDefaultAbilities();
-
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
-	TSubclassOf<class UGameplayEffect> DefaultAttibuteEffect;
-
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Abilities")
-	TArray<TSubclassOf<class UGameplayAbility>> DefaultAbilities;
 };
 
